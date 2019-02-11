@@ -56,7 +56,7 @@ nullDistribution <- function(null.sims=1000, alpha=0.05, fun, population.prob){
 		hold[i] <- eval(fun(alice=nullAlice, sample.mean=sample.mean, population.mean=population.mean, referent=referent))
 	}
 	nullDistribution <- sort(hold, decreasing=TRUE)
-	criticalValue <- 0
+	criticalValue <- mean(nullDistribution)
 	return(list(nullDist=nullDistribution, criticalVal=criticalValue))
 }
 
