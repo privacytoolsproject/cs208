@@ -19,14 +19,14 @@ null.sims <- 1000
 
 ## Generate underlying population attributes
 population.prob <- runif(n=k.attributes, min=0, max=1)
-population.mean <- 2*(population.prob-0.5)
+population.mean <- population.prob # 2*(population.prob-0.5)
 
 ## A utility function to create data from the population
 rmvbernoulli <- function(n=1, prob){
 	history <- matrix(NA, nrow=n, ncol=length(prob))
 	for(i in 1:n){
 		x<- rbinom(n=length(prob), size=1, prob=prob)
-		x[x==0] <- -1
+		x[x==0] <- 0      # Placeholder for transformation
 		history[i,] <- x
 	}
 	return(history)
