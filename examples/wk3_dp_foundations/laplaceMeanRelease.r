@@ -133,13 +133,12 @@ bootstrap <- function(x, y=NULL, n){
 
 ## Differentially private mean release
 meanRelease <- function(x, epsilon){
-
 	n <- length(x)
-	sensitivity <- (upper - lower)/n
-	scale <- sensitivity / epsilon
-
 	lower <- min(x) 
 	upper <- max(x) 
+
+	sensitivity <- (upper - lower)/n
+	scale <- sensitivity / epsilon
 
 	x.clipped <- clip(x, lower, upper)
 	sensitiveValue <- mean(x.clipped)
