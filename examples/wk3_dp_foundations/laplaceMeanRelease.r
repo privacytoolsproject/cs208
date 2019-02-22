@@ -111,7 +111,6 @@ data.y <- PUMSdata$income		# y-variable for regression
 populationTrue <- mean(data)
 
 
-
 ## Bound/Censor/Clip a variable to a range
 clip <- function(x, lower, upper){
 	x.clipped <- x
@@ -257,8 +256,31 @@ for(j in 1:length(ep.seq)){
 #se <- sd(PUMSdata$educ)/sqrt(n.seq)
 #lines(n.seq, se, col="red", lty=2, lwd=2)
 
-
 dev.copy2pdf(file="./figs/meanReleases.pdf")
+
+stop()
+
+## Plot true regression result
+
+par(mfcol=c(1,1))
+
+semi.blue <- rgb(0,90,239,50,maxColorValue=255)          # Slightly transparent colors
+semi.red  <- rgb(239,90,0,200,maxColorValue=255)
+
+plot(data.x, data.y, col=semi.blue, xlab="private education", ylab="private income")
+educ.seq <- 1:16
+for(i in 1:length(educ.seq)){
+	flag <- data.x==educ.seq[i]
+	partial.mean <- mean(data.y[flag])
+	points(x=educ.seq[i], y=partial.mean, col=semi.red, pch=17, lwd=2, cex=2)
+}
+output <- lm(income ~ educ, data=PUMSdata)
+abline(a=coef(output)[1], b=coef(output)[2], lwd=2, col="red")
+
+dev.copy2pdf(file="./figs/sensitiveRegression.pdf")
+
+
+
 
 
 
