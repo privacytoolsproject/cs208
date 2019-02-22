@@ -276,6 +276,7 @@ for(i in 1:length(educ.seq)){
 }
 output <- lm(income ~ educ, data=PUMSdata)
 abline(a=coef(output)[1], b=coef(output)[2], lwd=2, col="red")
+print(summary(output))
 
 dev.copy2pdf(file="./figs/sensitiveRegression.pdf")
 
