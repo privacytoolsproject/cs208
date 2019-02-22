@@ -272,7 +272,7 @@ educ.seq <- 1:16
 for(i in 1:length(educ.seq)){
 	flag <- data.x==educ.seq[i]
 	partial.mean <- mean(data.y[flag])
-	points(x=educ.seq[i], y=partial.mean, col=semi.red, pch=17, lwd=2, cex=2)
+	points(x=educ.seq[i], y=partial.mean, col=semi.red, pch=18, cex=2.5)
 }
 output <- lm(income ~ educ, data=PUMSdata)
 abline(a=coef(output)[1], b=coef(output)[2], lwd=2, col="red")
