@@ -131,10 +131,9 @@ ciPostProcess <- function(release, n, lower, upper, epsilon, alpha=0.05){
 	sensitivity <- (upper - lower)/n
 	scale <- sensitivity / epsilon
 
-	ci.radius <- qlap(p=1 - (alpha/2), b=scale) # Adjust this
-
-	ci.lower.bound <- release - ci.radius  
-	ci.upper.bound <- release + ci.radius  
+	ci.radius <- 1 # Adjust this
+	ci.lower.bound <- release - 1 # Adjust this 
+	ci.upper.bound <- release + 1 # Adjust this 
 
 	return(list(ciLower=ci.lower.bound, ciUpper=ci.upper.bound))
 }
