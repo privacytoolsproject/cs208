@@ -42,21 +42,24 @@ populationTrue <- median(data)
 
 
 
-medianRelease <- function(x, lower, upper, epsilon){
+medianRelease <- function(x, lower, upper, nbins=0, epsilon){
 	n <- length(x)
-	bins <- round(lower):round(upper)
+	if(nbins==0){
+		bins <- floor(lower):ceiling(upper)    # For integers, this is just lower:upper
+        nbins <- length(bins)
+    }
 	x.clipped <- clip(x, lower, upper)
     sensitiveValue <- median(x)
 
-	quality <- rep(NA, length(bins))
-	for(i in 1:length(bins)){
-		quality[i] <- min( sum(x<=bins[i]), sum(x>=bins[i]) )
+	quality <- rep(NA, nbins)
+	for(i in 1:length(quality)){
+		quality[i] <- 1                 # Correct this
 	}
 	likelihoods <- exp(epsilon * quality) / 2
 	probabilities <- likelihoods/sum(likelihoods)
     
-    flag <- runif(n=1, min=0, max=1) < cumsum(probabilities) 
-    DPrelease <- min(bins[flag])
+    flag <- runif(n=1, min=0, max=1) < cumsum(probabilities) # See also rmultinom()
+    DPrelease <- min(bins[flag]) 
 
     return(list(release=DPrelease, true=sensitiveValue))
 }
@@ -68,17 +71,16 @@ x <- data[sample.index]
 
 history <- rep(NA, n.sims)
 for(i in 1:n.sims){
-	history[i] <- medianRelease(x=x, lower=1, upper=16, epsilon=0.3)$release
+	history[i] <- medianRelease(x=x, lower=1, upper=16, epsilon=1)$release
 }
 
 par(mfcol=c(2,1))
-
-hist(x, breaks=(1:17 - 0.5), col="dodgerblue3", main="Histogram of private data")
-abline(v=populationTrue, col="red", lwd=1.5, lty=2)
+x.clipped <- clip(x, lower=1, upper=16)
+hist(x.clipped, breaks=(1:17 -0.5), col="dodgerblue3", main="Histogram of private data")
+abline(v=median(x.clipped), col="red", lwd=1.5, lty=2)
 dev.copy2pdf(file="./figs/medianExampleDataDist.pdf")
 
-hist(history, breaks=(1:17 - 0.5), col="dodgerblue3", main="Histogram of released DP medians\n epsilon=0.3")
-
+hist(history, breaks=(1:17 -0.5), col="dodgerblue3", main="Histogram of released DP medians")
 dev.copy2pdf(file="./figs/medianExample.pdf")
 
 
@@ -170,7 +172,7 @@ for(j in 1:length(ep.seq)){
 	allylim <- c(0, max(agghistory[,4]))
 
 	if(j==1){
-		plot(subhistory[,1],subhistory[,4], ylim=allylim, type="l", col=color.palette[j], xlab="N", ylab="Utility")
+		plot(subhistory[,1],subhistory[,4], ylim=allylim, type="l", col=color.palette[j], xlab="N", ylab="Utility/n")
 	}else{
 		lines(subhistory[,1],subhistory[,4], col=color.palette[j])
 	}
@@ -187,7 +189,7 @@ for(j in 1:length(ep.seq)){
 	xloc <- round(length(n.seq)*0.3)
 
 	if(j==1){
-		plot(subhistory[,1],subhistory[,4], ylim=allylim, type="l", log = "y", col=color.palette[j], xlab="N", ylab="Utility")
+		plot(subhistory[,1],subhistory[,4], ylim=allylim, type="l", log = "y", col=color.palette[j], xlab="N", ylab="Utility/n")
 		text(x=subhistory[xloc,1], y=subhistory[xloc,4], label=  bquote(paste(epsilon == .(ep.seq[j]))), col=color.palette[j], pos=4)
 	}else{
 		lines(subhistory[,1],subhistory[,4], col=color.palette[j])
