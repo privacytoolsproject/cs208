@@ -126,8 +126,6 @@ showHist <- function(release, main="Histogram"){
 	codebook <- release$codebook
 	true <- release$true
 
-	print(true)
-
 	allylim <- c(min(c(DPrelease,true), na.rm = TRUE), max(c(DPrelease, true), na.rm = TRUE))
 	granularity <- (max(codebook) - min(codebook))/(length(codebook)-1)
 
