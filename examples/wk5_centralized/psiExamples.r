@@ -74,7 +74,8 @@ globalDelta <- 10^-6
 eps.1 <- 0.5
 eps.2 <- 0.1
 eps.3 <- 0.3
-delta.1 <- delta.2 <- delta.3 <- globalDelta/3
+delta.1 <- delta.2 <- delta.3 <- globalDelta/6   # Note we assigning are using delta_i = globalDelta/(2*k) for each of our k queries, 
+												  # and leaving the rest of the global delta available to the optimal composition function
 
 params <- matrix(c(eps.1, delta.1,
 	               eps.2, delta.2,
@@ -98,6 +99,35 @@ params <- matrix(c(eps.1, delta.1,
 out <- PSIlence:::KOVhet(params=params, d_g=globalDelta, print=TRUE)  
 
 
+# And the following function gives the inverse, that is, given global epsilon and delta, finds a best (here equal) division
+# among k releases that under optimal composition satisfies the global totals
+# ':::'' is used for a function that is not exported from the package
+# For implementation see: https://github.com/privacytoolsproject/PSI-Library/blob/develop/R/update_parameters.R
+# Or from R:> print(PSIlence:::update_parameters)
+#
+# Args:
+#	params: kx2 matrix of privacy parameters where column one corresponds
+#			to epsilons and column two is deltas.
+#	hold: vector of indices corresponding to rows of params that will not 
+#		   be updated, either because they were just added or because the 
+#		   user has requested that these values stay fixed (Hold feature). 
+#	       If we are to update every parameter, set hold to 0. 
+#	eps: global epsilon
+#	del: global delta
+#
+# Returns:
+#	kx2 matrix of updated parameters
+
+k <- 3
+epsilonGlobal <- 1
+deltaGlobal <- 1e-9
+init <- rep(c(1/k, 0), k )
+
+params <- matrix(init, nrow=k, ncol=2, byrow=TRUE)
+
+inverse <- PSIlence:::update_parameters(params=params, hold=0, eps=epsilonGlobal, del=deltaGlobal)
+
+print(inverse)
 
 
 ## Demonstrate Error Promises and Epsilon Calculations
