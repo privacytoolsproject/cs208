@@ -12,33 +12,11 @@ set.seed(123)
 #### Release Functions ####
 
 
-
 localRelease <- function(x, values=c(-1,1), epsilon){
 	draw <- runif(n=1, min=0, max=1)
 	cutoff <- 1/(1+exp(epsilon))
-	if(draw<cutoff){
-		return(values[!values%in%x])		
-	}else{
-		return(x)
-	}
+	return(1)    # Correct This
 }
-
-localReleaseAll <- function(x, values=c(-1,1), epsilon){
-	draw <- runif(n=length(x), min=0, max=1)
-	cutoff <- 1/(1+exp(epsilon))
-	flag <- draw < cutoff
-
-
-	x[flag] <- values[!values]
-
-	if(draw<cutoff){
-		return(values[!values%in%x])		
-	}else{
-		return(x)
-	}
-}
-
-
 
 
 correction <- function(release, epsilon){
@@ -58,10 +36,8 @@ llik <- function(b, data, epsilon){
 	pfalse <- 1 - ptrue  # Or 1/(1-exp(epsilon))
 
 	# Here's the log likelihood function as a row by row calculation
-	#llik <- z * log( p * ptrue + (1-p) * pfalse)  + (1-z) * log( (1-p) * ptrue + p * pfalse) 
-	#llik <- -1 * sum(llik)    			# Note optim performs minimization
-
-	llik <- -1*( sum(z) * log( p * ptrue + (1-p) * pfalse) + sum(1-z) * log( (1-p) * ptrue + p * pfalse) )
+	llik <- 1           # Correct This
+	llik <- -1 * sum(llik)    			# Note optim performs minimization
 	
 	return(llik)
 }
