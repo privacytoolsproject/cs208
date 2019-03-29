@@ -348,6 +348,112 @@ dev.copy2pdf(file="./figs/localModelRMSEOverN.pdf")
 
 
 
+#### Build example from Histograms ####
+stop()
+
+library("foreign")
+PUMSdata <- read.csv(file="../../data/FultonPUMS5full.csv")   
+
+data <- PUMSdata$educ    		# variable for means
+
+## Sample with replacement from a vector
+bootstrap <- function(x, y=NULL, n){
+	index <- sample(x=1:length(x), size=n, replace=TRUE) 
+
+	if(is.null(y)){
+		return(x[index])
+	}else{
+		return(list(x=x[index], y=y[index]))
+	}
+}
+
+showHist <- function(release, main="Histogram"){
+
+	semi.blue <- rgb(0,90,239,150,maxColorValue=255)          # Slightly transparent colors
+	semi.red  <- rgb(239,90,0,150,maxColorValue=255)
+
+	DPrelease <- release$release
+	codebook <- release$codebook
+	true <- release$true
+
+	allylim <- c(min(c(DPrelease,true), na.rm = TRUE), max(c(DPrelease, true), na.rm = TRUE))
+	granularity <- (max(codebook) - min(codebook))/(length(codebook)-1)
+
+	allxlim <- c(min(codebook) - 0.5*granularity, max(codebook + 0.5*granularity))
+
+	# If stability threshold would be off the graph, extend range of graph
+    if(!is.null(release$threshold)){
+    	if(release$threshold>allylim[2]){
+    		allylim[2]<-release$threshold
+    	}
+    }
+
+    # Build empty plot
+	plot.new()
+	plot.window( xlim=allxlim, ylim=allylim)
+	title(main = main)
+	axis( side=1 )
+	axis( side=2 )
+
+	tiny <- granularity*0.03 # slight spacing between bars
+	overlap <- granularity*0.2 # some small overlap between sensitive and DP values
+
+	for(i in 1:length(codebook)){
+		rect(xleft=codebook[i]-overlap, ybottom=0, xright=codebook[i]+0.5*granularity-tiny, ytop=true[i], col=semi.red)
+		rect(xleft=codebook[i]-0.5*granularity+tiny, ybottom=0, xright=codebook[i]+overlap, ytop=DPrelease[i], col=semi.blue)
+	}
+
+	# If present, show stability threshold
+	if(!is.null(release$threshold)){
+		abline(h=release$threshold, col="black", lty=2, lwd=1.5)
+	}
+}
+
+
+
+
+## Differentially private histogram for integers
+integerHistogramRelease <- function(x, lower, upper, nbins=0, epsilon){
+	n <- length(x)
+	if(nbins==0){
+		lower <- floor(lower)
+		upper <- ceiling(upper)
+		bins <- lower:upper   
+        nbins <- length(bins)
+    }
+
+    x.clipped <- clip(x=x, lower=lower, upper=upper)
+
+	sensitivity <- 2
+	scale <- sensitivity / epsilon
+
+	sensitiveValue <- DPrelease <- rep(NA,nbins)
+	for(i in 1:length(bins)){
+		sensitiveValue[i] <- sum(x.clipped==bins[i])
+		DPrelease[i] <- sensitiveValue[i] + rlap(mu=0, b=scale, size=1)
+	}
+
+	return(list(release=DPrelease, true=sensitiveValue, codebook=bins))
+}
+
+nboot <- 2000
+data1 <- bootstrap(data, n=nboot)
+
+out1 <- integerHistogramRelease(x=data1, lower=1, upper=16, epsilon=0.5)
+
+
+#out1 <- rep(NA, nboot)
+#for(i in 1:nboot)){
+#	out1[i] <- integerHistogramRelease(x=data1[i], lower=1, upper=16, epsilon=0.5)
+#}
+
+
+par(mfcol=c(1,1))
+showHist(out1, main="Integer Histogram")
+dev.copy2pdf(file="./figs/integerHistogramRelease.pdf")
+
+
+
 
 
 
