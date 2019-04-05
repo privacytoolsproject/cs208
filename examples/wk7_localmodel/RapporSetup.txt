@@ -1,0 +1,24 @@
+## Setup Google RAPPOR
+
+1. Change directory to where you want to install the RAPPOR repository, then:
+$ git clone https://github.com/google/rappor.git
+
+2. Install R packages:
+
+library.list <- c("glmnet", "limSolve", "ggplot2", "optparse", "shiny")
+
+install.packages(library.list, repos="https://cran.cnr.berkeley.edu/")
+
+3. Change directory to $ cd rappor/apps/rappor-sim
+$ ./run_app.sh
+
+4. Point browser to:
+http://localhost:6788/
+
+Also worth looking at if you are exploring this codebase:
+
+5. cd rappor/apps/rappor-analysis
+$ ./run_app.sh
+
+6. Point browser to:
+http://localhost:6789/
