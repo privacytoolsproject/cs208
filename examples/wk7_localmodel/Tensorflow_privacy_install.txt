@@ -1,0 +1,26 @@
+## Tensorflow privacy install
+
+git clone -n https://github.com/tensorflow/privacy.git
+
+cd privacy
+
+# There appears to be a breaking commit Thursday!
+git checkout e8113a03658c40eeb8ad6d9cbb3d165848b9d68a
+
+
+pip install tensorflow
+
+pip install -e .
+
+
+
+
+## Run composition analysis before SGD
+
+cd analysis
+
+Python compute_dp_sgd_privacy.py --N=60000 --batch_size=256 --noise_multiplier=1.1 --epochs=60 --delta=1e-5
+
+
+#DP-SGD with sampling rate = 0.427% and noise_multiplier = 1.1 iterated over 14063 steps satisfies differential privacy with eps = 3.01 and delta = 1e-05.
+#The optimal RDP order is 9.0.
