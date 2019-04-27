@@ -13,11 +13,11 @@ calcllik<-function(b,data){
 
 ## Differentially private mean release
 gaussianReleaseNoise <- function(size=1, sensitivity, epsilon, delta){
-	divided.epsilon <- epsilon/size
-	scale <- sensitivity *sqrt(2*log(1.25/delta))/ divided.epsilon
+	scale <- sensitivity *sqrt(2*log(1.25/delta))/ epsilon
 	noise <- rnorm(n=size, mean=0, sd=scale)
 	return(noise)
 }
+
 
 ## Bound/Censor/Clip a variable to a range
 clip <- function(x, lower, upper){
@@ -81,6 +81,8 @@ dev.copy2pdf(file="./figs/logitLLike.pdf")
 
 
 
+
+
 calcgradient <- function(B, C, theta, fun){
 	dx <- 0.0001
 
@@ -88,12 +90,13 @@ calcgradient <- function(B, C, theta, fun){
 	out2 <- eval(fun(b=theta + c(0,dx), data=B))
 	out3 <- eval(fun(b=theta + c(dx,0), data=B))
 
-	Del.1 <- 1
-	# Del.1 <- clip(Del.1, lower=0, upper=1)  # Fix this
+	Del.1 <- (out3 - out1)/dx
+	Del.1 <- clip(Del.1,-C,C)
 	mean.Del.1 <- mean(Del.1)
 
-	Del.2 <- 1
-	# Del.2 <- clip(Del.2, lower=0, upper=1)  # Fix this
+
+	Del.2 <- (out2 - out1)/dx
+	Del.2 <- clip(Del.2,-C,C)
 	mean.Del.2 <- mean(Del.2)
 
 	return(c(mean.Del.1,mean.Del.2))
@@ -104,7 +107,7 @@ calcgradient <- function(B, C, theta, fun){
 N <- nrow(mydata)
 L <- round(sqrt(nrow(mydata)))
 
-steps <- 10   	  # Fix this
+steps <- L
 
 ## Shuffle the data
 index <- sample(1:nrow(mydata))
@@ -114,7 +117,6 @@ epsilon <-1
 theta <- c(0,0)   # Starting parameters
 C <- 10			  # Interval to clip over
 nu <- c(1,0.01)   # Learning speeds
-
 
 history <- matrix(NA, nrow=steps+1, ncol=2)
 history[1,] <- theta
@@ -129,9 +131,9 @@ for(i in 1:steps){
 
 	index<-sample(1:nrow(mydata),L)
 	B <- mydata[startB:stopB, ]
-	Del <- calcgradient(B, C, theta, fun=calcllik)
+	Del <- calcgradient(B, C, theta, fun=calcllik) + gaussianReleaseNoise(size=2, sensitivity=2*C/L, epsilon=epsilon*L/2, delta=1e-5)
 	cat("Del:  ",Del,"\n")
-	theta <- theta   				# Fix this
+	theta <- theta - (Del * nu) 
 	cat("Theta:",theta, "\n")
 
 	history[i+1,] <- theta
